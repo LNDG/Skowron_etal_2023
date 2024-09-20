@@ -5,7 +5,7 @@
     * the modelling folder contains all scripts required to fit the behavioral models reported in the paper (i.e., Bayesian and Rescorla-Wagner learning models) and perform model/parameter recovery checks
     * get_beh.m and win_model_beh.m prepare variables (behavior and model parameters) for analysis (including winsorization)
     * beh_analysis_within.sav and model_beh.sav contain all variables required to replicate all behavioral results reported in the paper
-    * plot_beh.m and plot_prior_brain_score.m generate the plots shown in Figure 3, Figure 4D and Figure 5B
+    * plot_beh.m generates the plots shown in Figure 3, Figure 4D and Figure 5B
 * Preproc folder contains script to perform fMRI preprocessing
     * script should be executed in numberic order. Unlabeled scripts and folders contain functions that are called in different preprocessing steps.
     * preproc_config.sh specifies paths and parameter setting for preprocessing
