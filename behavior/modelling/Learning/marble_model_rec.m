@@ -1,12 +1,13 @@
 %model comparison
 clear all
 
-model_name = {'RW' 'Bayes_expo' 'Bayes_prior' 'Bayes_expo2' 'Bayes_prior2'};
+model_name = {'RW' 'Bayes_expo' 'Bayes_prior' 'Bayes_expo2' 'Bayes_prior2' 'Bayes_prior2_expo'};
+Npar = [2 1 1 2 2 3]; % number of free model parameters
 
 % matrix containing proportions of best simulated subjects' fitting model for each ground truth
 % model (ground truth model x recovered model)
 
-model_rec_mat = nan(5);
+model_rec_mat = nan(length(model_name));
 
 %% count datapoints per subject
 % for some reason missing information post scanner (trials 54+) - not
@@ -58,8 +59,7 @@ for m = 1:length(model_name)
 % model simulation folder
 cd(['/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/sim_beh/' model_name{m}]) % simulated behaviour
 
-
-LL_mat = nan(Nsub,5);
+LL_mat = nan(Nsub,length(model_name));
 
 for m_rec = 1:length(model_name)
     load([model_name{m_rec} '_par_fit.mat'],'LL')
@@ -73,12 +73,14 @@ LL_sum = sum(LL_mat,1); % sum of negative log likelihoods
 BIC_total = nan(1,length(LL_sum));
 
 for m_rec = 1:length(model_name)
+
+    BIC_total(m_rec) = (Npar(m_rec)*Nsub)*log(sum(Ndata)) + 2.*LL_sum(m_rec);
         
-    if contains(model_name{m_rec},'2') || contains(model_name{m_rec},'RW')
-        BIC_total(m_rec) = (2*Nsub)*log(sum(Ndata)) + 2.*LL_sum(m_rec); % error models / RW models
-    else
-        BIC_total(m_rec) = Nsub*log(sum(Ndata)) + 2.*LL_sum(m_rec); % sampling models
-    end
+    % if contains(model_name{m_rec},'2') || contains(model_name{m_rec},'RW')
+    %     BIC_total(m_rec) = (2*Nsub)*log(sum(Ndata)) + 2.*LL_sum(m_rec); % error models / RW models
+    % else
+    %     BIC_total(m_rec) = Nsub*log(sum(Ndata)) + 2.*LL_sum(m_rec); % sampling models
+    % end
     
 end
 
@@ -96,12 +98,14 @@ BIC_sub = nan(size(LL_mat));
 
 for m_rec = 1:length(model_name)
     for i = 1:Nsub
+
+        BIC_sub(i,m_rec) = Npar(m_rec)*log(Ndata(i)) + 2.*LL_mat(i,m_rec); % error models
         
-        if contains(model_name{m_rec},'2') || contains(model_name{m_rec},'RW')
-            BIC_sub(i,m_rec) = 2*log(Ndata(i)) + 2.*LL_mat(i,m_rec); % error models
-        else
-            BIC_sub(i,m_rec) = log(Ndata(i)) + 2.*LL_mat(i,m_rec); % sampling models
-        end
+        % if contains(model_name{m_rec},'2') || contains(model_name{m_rec},'RW')
+        %     BIC_sub(i,m_rec) = 2*log(Ndata(i)) + 2.*LL_mat(i,m_rec); % error models
+        % else
+        %     BIC_sub(i,m_rec) = log(Ndata(i)) + 2.*LL_mat(i,m_rec); % sampling models
+        % end
         
     end
 end
@@ -131,13 +135,14 @@ end
 % load('/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/util/hot_c.mat');
 
 h=heatmap(round(model_rec_mat,2),'XLabel','recovered model','YLabel','simulated model')
-labels = ["RW","expo","prior","expo+noise","prior+noise"];
+labels = ["RW","expo","prior","expo+noise","prior+noise", "prior+expo+noise"];
 h.XDisplayLabels = labels;
 h.YDisplayLabels = labels;
 set(gca,'FontSize',20);
+pause
 
-saveas(gcf,'/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/figures/model_rec.jpg')
+saveas(gcf,'/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/figures/model_rec2.jpg')
 
 clf('reset')
 
-save('/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/model_rec_comp.mat','BIC_total_mat')
+save('/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/model_rec_comp2.mat','BIC_total_mat')

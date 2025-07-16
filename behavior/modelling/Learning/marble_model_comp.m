@@ -4,7 +4,8 @@ clear all
 % model fit output folder
 cd('/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning') % real behaviour
 
-model_name = {'RW' 'Bayes_expo' 'Bayes_prior' 'Bayes_expo2' 'Bayes_prior2'};
+model_name = {'RW' 'Bayes_expo' 'Bayes_prior' 'Bayes_expo2' 'Bayes_prior2' 'Bayes_prior_expo' 'Bayes_prior2_expo'};
+Npar = [2 1 1 2 2 2 3]; % number of free model parameters
 
 load('/Users/skowron/Documents/Entscheidung2_dump/modelling/PGT2016_data_MRIpost_04-Mar-2018.mat')
 
@@ -58,17 +59,30 @@ LL_sum = sum(LL_mat,1); % sum of negative log likelihoods
 
 BIC_total = nan(1,length(LL_sum));
 
+%original models
 for m = 1:length(model_name)
 
-    if contains(model_name{m},'2')|| contains(model_name{m},'RW')
-        BIC_total(m) = (2*Nsub)*log(sum(Ndata)) + 2.*LL_sum(m); % error models
-    else
-        BIC_total(m) = Nsub*log(sum(Ndata)) + 2.*LL_sum(m); % sampling models
-    end
+    BIC_total(m) = (Npar(m)*Nsub)*log(sum(Ndata)) + 2.*LL_sum(m);
+
+    % if contains(model_name{m},'2')|| contains(model_name{m},'RW')
+    %     BIC_total(m) = (2*Nsub)*log(sum(Ndata)) + 2.*LL_sum(m); % error models
+    % else
+    %     BIC_total(m) = Nsub*log(sum(Ndata)) + 2.*LL_sum(m); % sampling models
+    % end
 
 end
 
+plot(1:length(BIC_total),BIC_total,'r.','MarkerSize',50)
+title(['overall BIC'])
+xticks(1:length(BIC_total))
+xticklabels(model_name)
+pause
+
 [~, best_model_all] = min(BIC_total)
+
+saveas(gcf,'/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/figures/overall_model_comp2.jpg')
+
+clf('reset')
 
 % % without outlier
 % LL_mat_filt = LL_mat([1:49 51:end],:);
@@ -85,12 +99,14 @@ BIC_sub = nan(size(LL_mat));
 
 for m = 1:length(model_name)
     for i = 1:Nsub
+
+        BIC_sub(i,m) = Npar(m)*log(Ndata(i)) + 2.*LL_mat(i,m); % error models
         
-        if contains(model_name{m},'2') || contains(model_name{m},'RW')
-            BIC_sub(i,m) = 2*log(Ndata(i)) + 2.*LL_mat(i,m); % error models
-        else
-            BIC_sub(i,m) = log(Ndata(i)) + 2.*LL_mat(i,m); % sampling models
-        end
+        % if contains(model_name{m},'2') || contains(model_name{m},'RW')
+        %     BIC_sub(i,m) = 2*log(Ndata(i)) + 2.*LL_mat(i,m); % error models
+        % else
+        %     BIC_sub(i,m) = log(Ndata(i)) + 2.*LL_mat(i,m); % sampling models
+        % end
         
     end
 end
@@ -98,7 +114,7 @@ end
 [~,best_model_sub]=min(BIC_sub,[],2);
 
 % plotting
-best_categ = categorical(best_model_sub,1:length(model_name),{'RW' 'expo' 'prior' 'expo+noise' 'prior+noise'});
+best_categ = categorical(best_model_sub,1:length(model_name),{'RW' 'expo' 'prior' 'expo+noise' 'prior+noise' 'prior+expo' 'prior+expo+noise'});
 histogram(best_categ,'BarWidth',0.9,'FaceColor',"#0096d1",'EdgeColor','none')
 % xticks(1:length(model_name))
 % xticklabels({'expo' 'prior' 'expo+noise' 'prior+noise'});
@@ -107,11 +123,12 @@ ylim([y_val(1) y_val(2)+2])
 xlabel('model')
 ylabel('number of subjects')
 set(gca,'FontSize',26);
+pause
 
-saveas(gcf,'/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/figures/model_comp.jpg')
+saveas(gcf,'/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning/figures/model_comp2.jpg')
 
 clf('reset')
 
-plot(BIC_sub')
-xlabel('model')
-ylabel('BIC')
+% plot(BIC_sub')
+% xlabel('model')
+% ylabel('BIC')

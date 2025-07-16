@@ -4,7 +4,7 @@
 cd('/Users/skowron/Documents/Entscheidung2_dump/modelling/Learning')
 clear all
 
-model_name = {'RW' 'Bayes_expo' 'Bayes_expo2' 'Bayes_prior' 'Bayes_prior2'};
+model_name = {'RW' 'Bayes_expo' 'Bayes_expo2' 'Bayes_prior' 'Bayes_prior2' 'Bayes_prior_expo' 'Bayes_prior2_expo'};
 %{'Bayes_expo' 'Bayes_expo2' 'Bayes_prior' 'Bayes_prior2' 'Bayes_rate' 'Bayes_prior_rec' 'Bayes_prior_rec2'};
 
 %N=51
@@ -12,7 +12,7 @@ load('/Users/skowron/Documents/Entscheidung2_dump/behaviour/beh_measures.mat','s
 sub_ls = sids;
 clear sids
 
-for m = 1:length(model_name)
+for m = 6:length(model_name)
     
     %load simulation parameters (i.e. subject fitted parameters)
     load([model_name{m} '_par_fit.mat'],'theta')

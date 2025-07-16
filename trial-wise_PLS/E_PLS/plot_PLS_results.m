@@ -3,8 +3,8 @@ clear all
 
 pn.root = '/Users/skowron/Volumes/tardis1/Entscheidung2/analysis/trial-wise_PLS/figures/';
 
-addpath(genpath('/Users/skowron/Volumes/tardis1/toolboxes/preprocessing_tools'))
-addpath(genpath('/Users/skowron/Volumes/tardis1/toolboxes/NIfTI_20140122'))
+addpath(genpath('/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/toolboxes/preprocessing_tools'))
+addpath(genpath('/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/toolboxes/NIfTI_20140122'))
 
 %% samples SD with prior median split groups
 
@@ -82,8 +82,44 @@ clf('reset')
 %% samples SD
 
 % task PLS
-load('/Users/skowron/Volumes/tardis1/Entscheidung2/analysis/trial-wise_PLS/results/allCond/sd_datamats/TaskPLS_samples_ranked_allCond_BfMRIresult.mat');
+load('Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/results/allCond/sd_datamats/TaskPLS_samples_ranked_allCond_BfMRIresult.mat');
 
+
+% ---get median SD change---
+
+% get voxels of behavioural PLS effect
+
+PLS_result_path = 'Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/results/allCond/sd_datamats';
+
+fname = '/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/figures/TaskPLS_samples_ranked_allCond_BfMRIbsr_lv1_pos.nii';
+
+Beh_PLS_effect_mask = double(S_load_nii_2d( fname ));
+clear fname
+
+mask_coords_pos = find(Beh_PLS_effect_mask > 0);
+
+% load common coords
+load('/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/E_PLS/coords_EVAL.mat')
+
+%find mask coords in common coords
+
+[~,~,mask_coords_pos]=intersect(mask_coords_pos,final_coords);
+
+% get subjects s5-s1 SD BOLD in pos effect voxels as pct change
+
+SD_pos_effect = nan(length(subj_name),length(mask_coords_pos));
+
+for i = 1:length(subj_name)
+   
+    load([PLS_result_path '/' subj_name{i} '_BfMRIsessiondata.mat'], 'st_datamat');
+    
+    SD_pos_effect(i,:) = (st_datamat(5,mask_coords_pos) ./ st_datamat(1,mask_coords_pos)) .* 100;
+    
+end
+
+median_SD_pos_effect = median(SD_pos_effect,2);
+
+% ---plotting---
 cond_means_org = result.boot_result.orig_usc(:,1);
 cond_means_CIhigh_org = result.boot_result.ulusc(:,1) - cond_means_org;
 cond_means_CIlow_org = result.boot_result.llusc(:,1) - cond_means_org;
@@ -309,15 +345,15 @@ clf('reset')
 
 %% plot median BOLD SD in effect regions (BSR > 3) for Beh PLS results (N=47)
 
-load('/Users/skowron/Volumes/tardis1/Entscheidung2/analysis/trial-wise_PLS/results/allCond/sd_datamats/allCond_ranked_errorOnlyRANK_N47_BehPLS_BfMRIresult.mat');
+load('/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/results/allCond/sd_datamats/allCond_ranked_errorOnlyRANK_N47_BehPLS_BfMRIresult.mat');
 
 % ---get median SD---
 
 % get voxels of behavioural PLS effect
 
-PLS_result_path = '/Users/skowron/Volumes/tardis1/Entscheidung2/analysis/trial-wise_PLS/results/allCond/sd_datamats';
+PLS_result_path = '/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/results/allCond/sd_datamats';
 
-fname = '/Users/skowron/Volumes/tardis1/Entscheidung2/analysis/trial-wise_PLS/figures/allCond_ranked_errorOnlyRANK_N47_BehPLS_BfMRIbsr_lv1.nii.gz';
+fname = '/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/figures/allCond_ranked_errorOnlyRANK_N47_BehPLS_BfMRIbsr_lv1.nii.gz';
 
 Beh_PLS_effect_mask = double(S_load_nii_2d( fname ));
 clear fname
@@ -325,7 +361,7 @@ clear fname
 mask_coords_pos = find(Beh_PLS_effect_mask > 0);
 
 % load common coords
-load('/Users/skowron/Volumes/tardis1/Entscheidung2/analysis/trial-wise_PLS/E_PLS/coords_EVAL.mat')
+load('/Users/skowron/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LNDG tardis/Entscheidung2/analysis/trial-wise_PLS/E_PLS/coords_EVAL.mat')
 
 %find mask coords in common coords
 
@@ -334,16 +370,19 @@ load('/Users/skowron/Volumes/tardis1/Entscheidung2/analysis/trial-wise_PLS/E_PLS
 % get subjects SD BOLD in pos effect voxels
 
 SD_pos_effect = nan(length(subj_name),length(mask_coords_pos));
+SD_pos_effect_perc = nan(length(subj_name),length(mask_coords_pos));
 
 for i = 1:length(subj_name)
    
     load([PLS_result_path '/' subj_name{i} '_BfMRIsessiondata.mat'], 'st_datamat');
     
     SD_pos_effect(i,:) = st_datamat(8,mask_coords_pos);
+    SD_pos_effect_perc(i,:) = (st_datamat(5,mask_coords_pos) ./ st_datamat(1,mask_coords_pos)) .* 100;
     
 end
 
 median_SD_pos_effect = median(SD_pos_effect,2);
+median_SD_pos_effect_perc = median(SD_pos_effect_perc,2);
 
 % ---plot---
 

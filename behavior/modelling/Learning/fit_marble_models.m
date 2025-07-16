@@ -5,6 +5,120 @@ clear all
 load('../PGT2016_data_MRIpost_04-Mar-2018.mat')
 
 iter=10; % number of fitting iterations
+%% fit Bayesian updating model with free prior and expo par
+
+theta = nan(size(data,2),2);
+LL = nan(size(data,2),1);
+
+for i = 1:size(data,2)
+    
+    %prepare subject data
+    nBlue_mat = [];
+    N_mat = [];
+    p_response = [];
+    
+    for tr = 1:length(data(i).trial)
+        
+        nBlue_tr = data(i).trial(tr).sequence_marbles_color1;
+        N_tr = data(i).trial(tr).sequence_type;
+        p_response_tr = data(i).trial(tr).p_response./100;
+        
+        if ~any([isnan(nBlue_tr) isnan(N_tr) isnan(p_response_tr)])
+            nBlue_mat = [nBlue_mat; nBlue_tr];
+            N_mat = [N_mat; N_tr];
+            p_response = [p_response; p_response_tr];
+        end
+        
+        clear nBlue_tr N_tr p_response_tr
+        
+    end
+    
+    
+    for it = 1:iter
+        
+        theta_start = [20*rand+1 5*rand]; % starting value for optimisation
+        theta_lb = [1 0];
+        theta_ub = [Inf Inf];
+
+        [theta_fit LL_fit]=fmincon(@(x) Bayes_prior_expo_model(x, nBlue_mat, N_mat, p_response),theta_start,[],[],[],[],theta_lb,theta_ub);
+
+        if it > 1
+
+            if  LL_fit < LL(i)
+                theta(i,:)=theta_fit;
+                LL(i)=LL_fit;
+            end
+
+        else
+            theta(i,:)=theta_fit;
+            LL(i)=LL_fit;
+        end
+    
+    end
+end
+
+% save results
+save('Bayes_prior_expo_par_fit.mat','theta','LL')
+
+clear theta LL
+
+%% fit Bayesian updating model with free prior and expo par (noisy choice)
+
+theta = nan(size(data,2),3);
+LL = nan(size(data,2),1);
+
+for i = 1:size(data,2)
+    
+    %prepare subject data
+    nBlue_mat = [];
+    N_mat = [];
+    p_response = [];
+    
+    for tr = 1:length(data(i).trial)
+        
+        nBlue_tr = data(i).trial(tr).sequence_marbles_color1;
+        N_tr = data(i).trial(tr).sequence_type;
+        p_response_tr = data(i).trial(tr).p_response./100;
+        
+        if ~any([isnan(nBlue_tr) isnan(N_tr) isnan(p_response_tr)])
+            nBlue_mat = [nBlue_mat; nBlue_tr];
+            N_mat = [N_mat; N_tr];
+            p_response = [p_response; p_response_tr];
+        end
+        
+        clear nBlue_tr N_tr p_response_tr
+        
+    end
+    
+    
+    for it = 1:iter
+        
+        theta_start = [20*rand+1 5*rand 0.5*rand]; % starting value for optimisation
+        theta_lb = [1 0 0];
+        theta_ub = [Inf Inf Inf];
+
+        [theta_fit LL_fit]=fmincon(@(x) Bayes_prior2_expo_model(x, nBlue_mat, N_mat, p_response),theta_start,[],[],[],[],theta_lb,theta_ub);
+
+        if it > 1
+
+            if  LL_fit < LL(i)
+                theta(i,:)=theta_fit;
+                LL(i)=LL_fit;
+            end
+
+        else
+            theta(i,:)=theta_fit;
+            LL(i)=LL_fit;
+        end
+    
+    end
+end
+
+% save results
+save('Bayes_prior2_expo_par_fit.mat','theta','LL')
+
+clear theta LL
+
 
 %% fit Bayesian updating model with exponential evidence weight
 

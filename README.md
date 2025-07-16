@@ -15,8 +15,10 @@
     * scripts labeled A-D generate BOLD SD estimates for the different trials epochs (note that get_timings.m should be run before to get trial timings)
     * E_PLS folder contains scripts to run PLS analyses on BOLD SD estimates and plot the results shown in Figure 4
     * the mean_analysis folder contains scripts to obtain (model-free) GLM beta estimates for each sample period (see Results section in paper for details) and perform PLS analysis
+	* the mean_control folder contains scripts to run the reported control analyses checking whether SDbold effects still hold when accounting for MEANbold effects
     * the offset_change folder contains scripts to perform the reported control analysis checking whether delta BOLD SD effects can be explained by between-subject differences in BOLD SD at first sample exposure (see Results section in paper)
     * the pMod_analysis folder contains scripts to run PLS analysis on standard GLM uncertainty estimates (see paper) and produce the plots in Figure 5
     * the pMod_control folder contains scripts to perform the reported control analysis checking if BOLD SD and standard GLM beta effects are spatially distinct (see Results in paper)
+	* the subsample_betas_control folder contains scripts to run reported control analyses checking the correlation beteween SDbold estimated for the first and second half of trials separately
 
 For more details please contact the author: skowron(at)mpib-berlin.mpg.de

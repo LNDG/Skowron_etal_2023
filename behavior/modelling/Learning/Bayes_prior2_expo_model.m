@@ -1,5 +1,9 @@
-function LL = Bayes_expo_model(expo, nBlue_mat, N_mat, p_responses)
-%Bayesian model with exponential evidence weight
+function LL = Bayes_prior2_expo_model(theta, nBlue_mat, N_mat, p_responses)
+%Bayesian model with exponential evidence weight and noisy choice
+
+prior = theta(1);
+expo = theta(2);
+sigma = theta(3);
 
     for tr = 1:length(p_responses)
         
@@ -8,8 +12,8 @@ function LL = Bayes_expo_model(expo, nBlue_mat, N_mat, p_responses)
         N=N_mat(tr,:);
         
         % initial values of the beta distribution
-        alpha = 1;
-        beta = 1;
+        alpha = prior;
+        beta = prior;
 
         for b = 1:length(nBlue)
 
@@ -20,8 +24,17 @@ function LL = Bayes_expo_model(expo, nBlue_mat, N_mat, p_responses)
 
         end
         
+        %catch infinites
+        if isinf(alpha)
+            alpha = 10^10;
+        elseif isinf(beta)
+            beta = 10^10;
+        end
+        
         % get trial log likelihood
-        like=betapdf(p_responses(tr),alpha,beta);
+        trunc_norm = makedist('Normal', alpha/(alpha+beta), sigma);
+        trunc_norm = truncate(trunc_norm,0,1); % truncated normal distribution
+        like=pdf(trunc_norm,p_responses(tr));
         
         if like == 0
            like = 10^-5;

@@ -1,5 +1,8 @@
-function LL = Bayes_expo_model(expo, nBlue_mat, N_mat, p_responses)
+function LL = Bayes_prior_expo_model(theta, nBlue_mat, N_mat, p_responses)
 %Bayesian model with exponential evidence weight
+
+prior = theta(1);
+expo = theta(2);
 
     for tr = 1:length(p_responses)
         
@@ -8,8 +11,8 @@ function LL = Bayes_expo_model(expo, nBlue_mat, N_mat, p_responses)
         N=N_mat(tr,:);
         
         % initial values of the beta distribution
-        alpha = 1;
-        beta = 1;
+        alpha = prior;
+        beta = prior;
 
         for b = 1:length(nBlue)
 
